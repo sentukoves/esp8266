@@ -1,0 +1,54 @@
+
+ 
+#include <ESP8266WiFi.h> 
+#include "ESP8266WebServer.h"
+
+ESP8266WebServer server(80);      
+int capacity = 50;
+const char* ssid     = "Dem";        
+const char* password = "pass";  
+
+void setup() {
+  Serial.begin(115200);      
+  delay(10);
+  pinMode(D1, OUTPUT);
+
+  WiFi.begin(ssid, password);           
+
+
+  while (WiFi.status() != WL_CONNECTED) { 
+    delay(500);
+    Serial.println('.');
+  }
+
+  Serial.print("IP address:\t");
+  Serial.println(WiFi.localIP());
+  server.on("/on", startRelay);
+  server.on("/off", stopRelay);
+  server.on("/", handleRootPath);    
+  server.begin();                 
+  Serial.println("Server listening");
+}
+
+void startRelay() 
+{ 
+      Serial.println("On");
+      digitalWrite(D1, LOW);
+      server.send(200, "text/plain", "on");
+}
+void stopRelay() 
+{ 
+    Serial.println("off");
+    digitalWrite(D1, HIGH);
+    server.send(200, "text/plain", "off");
+ 
+
+}
+
+void loop() {
+  server.handleClient();     
+}
+
+void handleRootPath() {           
+  server.send(200, "text/plain", "Start page");
+}
